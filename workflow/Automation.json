@@ -1,0 +1,1139 @@
+{
+  "name": "Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Data Env Trigger').item.json.message.tds }}",
+                    "rightValue": "={{ $('Get Active Treshold').item.json.tds_min }}",
+                    "operator": {
+                      "type": "number",
+                      "operation": "lt"
+                    },
+                    "id": "00ecfd5a-bcd8-4984-8f46-2d5acf6e132e"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "ec023d91-8e0f-4821-bd1f-8af3439633d5",
+                    "leftValue": "={{ $('Data Env Trigger').item.json.message.ph }}",
+                    "rightValue": "={{ $('Get Active Treshold').item.json.ph_min }}",
+                    "operator": {
+                      "type": "number",
+                      "operation": "lt"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "64181fa2-7796-41c1-ab83-d4e46b3684ff",
+                    "leftValue": "={{ $('Data Env Trigger').item.json.message.ph }}",
+                    "rightValue": "={{ $('Get Active Treshold').item.json.ph_max }}",
+                    "operator": {
+                      "type": "number",
+                      "operation": "gt"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        688,
+        -16
+      ],
+      "id": "fef5d745-18cf-4217-a0b3-840cabd58cbe",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "topics": "environment/data",
+        "options": {
+          "jsonParseBody": true
+        }
+      },
+      "type": "n8n-nodes-base.mqttTrigger",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        -352
+      ],
+      "id": "b5290fd7-dc07-4f18-bdc6-ef59d53c8cad",
+      "name": "Data Env Trigger",
+      "credentials": {
+        "mqtt": {
+          "id": "nxPlZZqtgMoMIKs4",
+          "name": "MQTT account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "table": {
+          "__rl": true,
+          "value": "limit_values",
+          "mode": "list",
+          "cachedResultName": "limit_values"
+        },
+        "limit": 1,
+        "where": {
+          "values": [
+            {
+              "column": "is_active",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        160,
+        -352
+      ],
+      "id": "bfa812af-a814-4423-9d47-558151a91cba",
+      "name": "Get Active Treshold",
+      "alwaysOutputData": true,
+      "credentials": {
+        "mySql": {
+          "id": "FUKAK42fw1lGBLPH",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "table": {
+          "__rl": true,
+          "value": "records",
+          "mode": "list",
+          "cachedResultName": "records"
+        },
+        "dataMode": "defineBelow",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "limit_id",
+              "value": "={{ $json.limit_id === undifind ? null : $json.limit_id }}"
+            },
+            {
+              "column": "ph",
+              "value": "={{ $('Data Env Trigger').item.json.message.ph }}"
+            },
+            {
+              "column": "tds",
+              "value": "={{ $('Data Env Trigger').item.json.message.tds }}"
+            },
+            {
+              "column": "created_at",
+              "value": "={{ $('Data Env Trigger').item.json.message.datetime }}"
+            }
+          ]
+        },
+        "options": {
+          "detailedOutput": true
+        }
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        352,
+        -352
+      ],
+      "id": "d02c5315-9ae8-401a-8484-52c153f41674",
+      "name": "Add Record Env",
+      "alwaysOutputData": true,
+      "credentials": {
+        "mySql": {
+          "id": "FUKAK42fw1lGBLPH",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "table": {
+          "__rl": true,
+          "value": "tank_levels",
+          "mode": "list",
+          "cachedResultName": "tank_levels"
+        },
+        "dataMode": "defineBelow",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "record_id",
+              "value": "={{ $('Add Record Env').item.json.data.insertId }}"
+            },
+            {
+              "column": "tank",
+              "value": "NUTRITION_A"
+            },
+            {
+              "column": "level",
+              "value": "={{ $('Data Env Trigger').item.json.message.tank_a }}"
+            },
+            {
+              "column": "created_at",
+              "value": "={{ $('Data Env Trigger').item.json.message.datetime }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        688,
+        -832
+      ],
+      "id": "79e9f3e6-d48a-4333-8014-edde3708b22f",
+      "name": "Add Tank A",
+      "credentials": {
+        "mySql": {
+          "id": "FUKAK42fw1lGBLPH",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "table": {
+          "__rl": true,
+          "value": "tank_levels",
+          "mode": "list",
+          "cachedResultName": "tank_levels"
+        },
+        "dataMode": "defineBelow",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "record_id",
+              "value": "={{ $('Add Record Env').item.json.data.insertId }}"
+            },
+            {
+              "column": "tank",
+              "value": "NUTRITION_B"
+            },
+            {
+              "column": "level",
+              "value": "={{ $('Data Env Trigger').item.json.message.tank_b }}"
+            },
+            {
+              "column": "created_at",
+              "value": "={{ $('Data Env Trigger').item.json.message.datetime }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        688,
+        -672
+      ],
+      "id": "93396a1a-21ca-4c13-b9cf-fa55ef7e1267",
+      "name": "Add Tank B",
+      "credentials": {
+        "mySql": {
+          "id": "FUKAK42fw1lGBLPH",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "table": {
+          "__rl": true,
+          "value": "tank_levels",
+          "mode": "list",
+          "cachedResultName": "tank_levels"
+        },
+        "dataMode": "defineBelow",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "record_id",
+              "value": "={{ $('Add Record Env').item.json.data.insertId }}"
+            },
+            {
+              "column": "tank",
+              "value": "PH_UP"
+            },
+            {
+              "column": "level",
+              "value": "={{ $('Data Env Trigger').item.json.message.tank_ph_up }}"
+            },
+            {
+              "column": "created_at",
+              "value": "={{ $('Data Env Trigger').item.json.message.datetime }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        688,
+        -352
+      ],
+      "id": "5bf5ef7a-fa01-4410-bd32-f1a553c6d9ff",
+      "name": "Add Tank Ph Up",
+      "credentials": {
+        "mySql": {
+          "id": "FUKAK42fw1lGBLPH",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "table": {
+          "__rl": true,
+          "value": "tank_levels",
+          "mode": "list",
+          "cachedResultName": "tank_levels"
+        },
+        "dataMode": "defineBelow",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "record_id",
+              "value": "={{ $('Add Record Env').item.json.data.insertId }}"
+            },
+            {
+              "column": "tank",
+              "value": "PH_DOWN"
+            },
+            {
+              "column": "level",
+              "value": "={{ $('Data Env Trigger').item.json.message.tank_ph_down }}"
+            },
+            {
+              "column": "created_at",
+              "value": "={{ $('Data Env Trigger').item.json.message.datetime }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        688,
+        -512
+      ],
+      "id": "c7dc79f6-d9d4-44a0-8a78-957cd6c8eb88",
+      "name": "Add Tank Ph Down",
+      "credentials": {
+        "mySql": {
+          "id": "FUKAK42fw1lGBLPH",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "table": {
+          "__rl": true,
+          "value": "tank_levels",
+          "mode": "list",
+          "cachedResultName": "tank_levels"
+        },
+        "dataMode": "defineBelow",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "record_id",
+              "value": "={{ $('Add Record Env').item.json.data.insertId }}"
+            },
+            {
+              "column": "tank",
+              "value": "MAIN_TANK"
+            },
+            {
+              "column": "level",
+              "value": "={{ $('Data Env Trigger').item.json.message.tank_main }}"
+            },
+            {
+              "column": "created_at",
+              "value": "={{ $('Data Env Trigger').item.json.message.datetime }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        688,
+        -192
+      ],
+      "id": "18f0ea62-f68b-43c6-8894-7582647a7b2e",
+      "name": "Add Tank Main",
+      "credentials": {
+        "mySql": {
+          "id": "FUKAK42fw1lGBLPH",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "bd52cacd-a3f1-4a3f-b34e-955f51f571d8",
+              "leftValue": "={{ $('Data Env Trigger').item.json.message.tank_ph_up }}",
+              "rightValue": 10,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        960,
+        -352
+      ],
+      "id": "fc5f751f-fbf5-4688-af14-6cafacb3d781",
+      "name": "If Min Ph Up"
+    },
+    {
+      "parameters": {
+        "fcmToken": "/topics/notification",
+        "title": "Tank Warning",
+        "body": "=Larutan pH-Up tersisa {{ $('Data Env Trigger').item.json.message.tank_ph_up }}. Segera lakukan pengisian ulang.",
+        "additionalFields": {}
+      },
+      "type": "@digital-boss/n8n-nodes-google-firebase-notifications.googleFirebaseNotifications",
+      "typeVersion": 1,
+      "position": [
+        1168,
+        -368
+      ],
+      "id": "f9736e7a-80d9-4f26-ab6e-f155e8937996",
+      "name": "Send Ph Up Warning",
+      "credentials": {
+        "googleFirebaseNotificationsApi": {
+          "id": "IQdeWqW6pwanK6nL",
+          "name": "Google Firebase Notifications account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "60c9f5b2-cce3-4a4d-8704-0006f3bdf69a",
+              "leftValue": "={{ $('Data Env Trigger').item.json.message.tank-ph_down }}",
+              "rightValue": 10,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        960,
+        -512
+      ],
+      "id": "68058b1b-af8d-4291-9b48-bb261acd0c61",
+      "name": "If Min Ph Down"
+    },
+    {
+      "parameters": {
+        "fcmToken": "/topics/notification",
+        "title": "Tank Warning",
+        "body": "=Larutan pH-Down tersisa {{ $('Data Env Trigger').item.json.message.tank_ph_down }}. Segera lakukan pengisian ulang.",
+        "additionalFields": {}
+      },
+      "type": "@digital-boss/n8n-nodes-google-firebase-notifications.googleFirebaseNotifications",
+      "typeVersion": 1,
+      "position": [
+        1168,
+        -528
+      ],
+      "id": "b57946f3-d2ab-4ae0-aed0-7a1cd0050bb5",
+      "name": "Send Ph Down Warning",
+      "credentials": {
+        "googleFirebaseNotificationsApi": {
+          "id": "IQdeWqW6pwanK6nL",
+          "name": "Google Firebase Notifications account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f70cacf1-906d-410d-94e1-0953f7504722",
+              "leftValue": "={{ $('Data Env Trigger').item.json.message.tank_b }}",
+              "rightValue": 10,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        960,
+        -672
+      ],
+      "id": "3a670062-a706-4e3d-8a89-058b6ca46abc",
+      "name": "If Min Nutrition B"
+    },
+    {
+      "parameters": {
+        "fcmToken": "/topics/notification",
+        "title": "Tank Warning",
+        "body": "=Larutan nutrisi B tersisa {{ $('Data Env Trigger').item.json.message.tank_b }}. Segera lakukan pengisian ulang.",
+        "additionalFields": {}
+      },
+      "type": "@digital-boss/n8n-nodes-google-firebase-notifications.googleFirebaseNotifications",
+      "typeVersion": 1,
+      "position": [
+        1168,
+        -688
+      ],
+      "id": "33dae13a-4229-4cb1-9448-dc766ed36505",
+      "name": "Send Nutrition B Warning",
+      "credentials": {
+        "googleFirebaseNotificationsApi": {
+          "id": "IQdeWqW6pwanK6nL",
+          "name": "Google Firebase Notifications account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "465bb080-f4c5-48af-8024-1aedbee71f52",
+              "leftValue": "={{ $('Data Env Trigger').item.json.message.tank_a }}",
+              "rightValue": 10,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        960,
+        -832
+      ],
+      "id": "1b10a06b-6047-43f8-9433-ffa43876570d",
+      "name": "If Min Nutrition A"
+    },
+    {
+      "parameters": {
+        "fcmToken": "/topics/notification",
+        "title": "Tank Warning",
+        "body": "=Larutan nutrisi A tersisa {{ $('Data Env Trigger').item.json.message.tank_a }}. Segera lakukan pengisian ulang.",
+        "additionalFields": {}
+      },
+      "type": "@digital-boss/n8n-nodes-google-firebase-notifications.googleFirebaseNotifications",
+      "typeVersion": 1,
+      "position": [
+        1168,
+        -848
+      ],
+      "id": "6325bfbd-5b0d-424f-b143-966047b49290",
+      "name": "Send Nutrition A Warning",
+      "credentials": {
+        "googleFirebaseNotificationsApi": {
+          "id": "IQdeWqW6pwanK6nL",
+          "name": "Google Firebase Notifications account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const FL = 3; // (ml/s)\nconst VTank = 10; // (ml)\nconst HTank = 20; // (cm)\nconst Rrec = 2; // (ml/L)\n\nconst VCurrent = VTank * ((HTank - $('Data Env Trigger').first().json.message.tank_main) / HTank);\nconst Rv = (VCurrent / 1000) * Rrec;\nconst DurationPh = Rv / FL;\n\n\nreturn [\n  {\n    json: {\n      VCurrent,\n      Rv,\n      DurationPh,\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        0
+      ],
+      "id": "6615bfb9-e2d7-47ba-b23d-e82526a3ef5f",
+      "name": "Calculate Ph Up"
+    },
+    {
+      "parameters": {
+        "jsCode": "const FL = 3; // (ml/s)\nconst VTank = 10; // (ml)\nconst HTank = 20; // (cm)\nconst Rrec = 2; // (ml/L)\n\nconst VCurrent = VTank * ((HTank - $('Data Env Trigger').first().json.message.tank_main) / HTank);\nconst Rv = (VCurrent / 1000) * Rrec;\nconst DurationPh = Rv / FL;\n\n\nreturn [\n  {\n    json: {\n      VCurrent,\n      Rv,\n      DurationPh,\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        160
+      ],
+      "id": "b2a46591-8133-44cc-be86-7231f1f5eb21",
+      "name": "Calculate Ph Down"
+    },
+    {
+      "parameters": {
+        "topic": "pump/automation",
+        "sendInputData": false,
+        "message": "={ \"pump\": \"NUTRITION\", \"duration\": {{ $json.DurationN }}}",
+        "options": {
+          "retain": false
+        }
+      },
+      "type": "n8n-nodes-base.mqtt",
+      "typeVersion": 1,
+      "position": [
+        1168,
+        -160
+      ],
+      "id": "5d3debdf-bb7d-47f8-bbf2-ffed7e019bfb",
+      "name": "Send Add Nutrition",
+      "credentials": {
+        "mqtt": {
+          "id": "nxPlZZqtgMoMIKs4",
+          "name": "MQTT account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const FL = 3; // (ml/s)\nconst NT = 400; \nconst VTank = 10; // (ml)\nconst HTank = 20; // (cm)\nconst TT = ($('Get Active Treshold').first().json.tds_min + $('Get Active Treshold').first().json.tds_max) / 2;\n\nconst VCurrent = VTank * ((HTank - $('Data Env Trigger').first().json.message.tank_main) / HTank);\nconst VNutrient = ((TT - $('Data Env Trigger').first().json.message.tds) / (NT - TT)) * VCurrent;\nconst DurationN = VNutrient / FL;\n\n\nreturn [\n  {\n    json: {\n      VCurrent,\n      VNutrient,\n      DurationN,\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        -160
+      ],
+      "id": "2a26e828-e94a-4a09-8a26-7ae50a88b086",
+      "name": "Calculate Nutrition"
+    },
+    {
+      "parameters": {
+        "topic": "pump/automation",
+        "sendInputData": false,
+        "message": "={ \"pump\": \"PH_UP\", \"duration\": {{ $json.DurationPh }}}",
+        "options": {
+          "retain": false
+        }
+      },
+      "type": "n8n-nodes-base.mqtt",
+      "typeVersion": 1,
+      "position": [
+        1168,
+        0
+      ],
+      "id": "00d2afc9-1b0d-4579-b997-3a23af0d6458",
+      "name": "Send Add Ph Up",
+      "credentials": {
+        "mqtt": {
+          "id": "nxPlZZqtgMoMIKs4",
+          "name": "MQTT account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "topic": "pump/automation",
+        "sendInputData": false,
+        "message": "={ \"pump\": \"PH_DOWN\", \"duration\": {{ $json.DurationPh }}}",
+        "options": {
+          "retain": false
+        }
+      },
+      "type": "n8n-nodes-base.mqtt",
+      "typeVersion": 1,
+      "position": [
+        1168,
+        160
+      ],
+      "id": "a3af4da7-ef9a-4085-9fb1-ef31e1ce8b2a",
+      "name": "Send Add Ph Down",
+      "credentials": {
+        "mqtt": {
+          "id": "nxPlZZqtgMoMIKs4",
+          "name": "MQTT account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "table": {
+          "__rl": true,
+          "value": "pump_histories",
+          "mode": "list",
+          "cachedResultName": "pump_histories"
+        },
+        "dataMode": "defineBelow",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "record_id",
+              "value": "={{ $('Add Record Env').item.json.data.insertId }}"
+            },
+            {
+              "column": "pump",
+              "value": "PUMP_PH_DOWN"
+            },
+            {
+              "column": "duration_on",
+              "value": "={{ $json.DurationPh }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        1376,
+        160
+      ],
+      "id": "ec29aefb-2e2b-46ea-b9e0-d63c08e33016",
+      "name": "Add Record Ph Down",
+      "credentials": {
+        "mySql": {
+          "id": "FUKAK42fw1lGBLPH",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "table": {
+          "__rl": true,
+          "value": "pump_histories",
+          "mode": "list",
+          "cachedResultName": "pump_histories"
+        },
+        "dataMode": "defineBelow",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "record_id",
+              "value": "={{ $('Add Record Env').item.json.data.insertId }}"
+            },
+            {
+              "column": "pump",
+              "value": "PUMP_PH_UP"
+            },
+            {
+              "column": "duration_on",
+              "value": "={{ $json.DurationPh }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        1376,
+        0
+      ],
+      "id": "a29989e8-810e-4da3-b317-173a34c9644a",
+      "name": "Add Record Ph Up",
+      "credentials": {
+        "mySql": {
+          "id": "FUKAK42fw1lGBLPH",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "table": {
+          "__rl": true,
+          "value": "pump_histories",
+          "mode": "list",
+          "cachedResultName": "pump_histories"
+        },
+        "dataMode": "defineBelow",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "record_id",
+              "value": "={{ $('Add Record Env').item.json.data.insertId }}"
+            },
+            {
+              "column": "pump",
+              "value": "PUMP_NUTRITION"
+            },
+            {
+              "column": "duration_on",
+              "value": "={{ $json.DurationN }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        1376,
+        -160
+      ],
+      "id": "d69211c2-0edd-4eaa-b384-3165dcaf5c7f",
+      "name": "Add Record Nutrition",
+      "credentials": {
+        "mySql": {
+          "id": "FUKAK42fw1lGBLPH",
+          "name": "MySQL account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Calculate Nutrition",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Calculate Ph Up",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Calculate Ph Down",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data Env Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Active Treshold",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Active Treshold": {
+      "main": [
+        [
+          {
+            "node": "Add Record Env",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Record Env": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Add Tank Main",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Add Tank Ph Up",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Add Tank Ph Down",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Add Tank B",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Add Tank A",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Tank A": {
+      "main": [
+        [
+          {
+            "node": "If Min Nutrition A",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Tank Ph Up": {
+      "main": [
+        [
+          {
+            "node": "If Min Ph Up",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Min Ph Up": {
+      "main": [
+        [
+          {
+            "node": "Send Ph Up Warning",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Send Ph Up Warning": {
+      "main": [
+        []
+      ]
+    },
+    "Add Tank Ph Down": {
+      "main": [
+        [
+          {
+            "node": "If Min Ph Down",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Tank B": {
+      "main": [
+        [
+          {
+            "node": "If Min Nutrition B",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Min Ph Down": {
+      "main": [
+        [
+          {
+            "node": "Send Ph Down Warning",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Min Nutrition B": {
+      "main": [
+        [
+          {
+            "node": "Send Nutrition B Warning",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Min Nutrition A": {
+      "main": [
+        [
+          {
+            "node": "Send Nutrition A Warning",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Ph Up": {
+      "main": [
+        [
+          {
+            "node": "Send Add Ph Up",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Ph Down": {
+      "main": [
+        [
+          {
+            "node": "Send Add Ph Down",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Add Nutrition": {
+      "main": [
+        [
+          {
+            "node": "Add Record Nutrition",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Nutrition": {
+      "main": [
+        [
+          {
+            "node": "Send Add Nutrition",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Add Ph Up": {
+      "main": [
+        [
+          {
+            "node": "Add Record Ph Up",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Add Ph Down": {
+      "main": [
+        [
+          {
+            "node": "Add Record Ph Down",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e9443fcd-4caf-4af1-915b-78f14ddd9146",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0244782b7ae9b921dd7e4d2535e0e4743669000f812c3d7de7e1235440505061"
+  },
+  "id": "W1kjNnZVmFM2Fdiu",
+  "tags": []
+}
