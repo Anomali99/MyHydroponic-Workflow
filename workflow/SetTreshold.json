@@ -1,0 +1,562 @@
+{
+  "name": "Set Treshold",
+  "nodes": [
+    {
+      "parameters": {
+        "table": {
+          "__rl": true,
+          "value": "limit_values",
+          "mode": "list",
+          "cachedResultName": "limit_values"
+        },
+        "dataMode": "defineBelow",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "is_active",
+              "value": "1"
+            },
+            {
+              "column": "ph_min",
+              "value": "={{ $('Update Threshold').item.json.body.ph_min }}"
+            },
+            {
+              "column": "ph_max",
+              "value": "={{ $('Update Threshold').item.json.body.ph_max }}"
+            },
+            {
+              "column": "tds_min",
+              "value": "={{ $('Update Threshold').item.json.body.tds_min }}"
+            },
+            {
+              "column": "tds_max",
+              "value": "={{ $('Update Threshold').item.json.body.tds_max }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        976,
+        16
+      ],
+      "id": "b5fe21e4-7c2b-4478-bd19-8694e06e1a60",
+      "name": "Add New Data",
+      "alwaysOutputData": true,
+      "credentials": {
+        "mySql": {
+          "id": "FUKAK42fw1lGBLPH",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": {{true}},\n  \"ph_max\": {{ $('Update Threshold').item.json.body.ph_max }},\n  \"ph_min\": {{ $('Update Threshold').item.json.body.ph_min }},\n  \"tds_max\": {{ $('Update Threshold').item.json.body.tds_max }},\n  \"tds_min\": {{ $('Update Threshold').item.json.body.tds_min }},\n  \"is_active\": {{ $('Update Threshold').item.json.body.is_active }}\n}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1312,
+        -320
+      ],
+      "id": "9d437b15-eae2-491b-8054-689527e0e733",
+      "name": "Success Update Response"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"message\": \"failed update data\"\n}",
+        "options": {
+          "responseCode": 500
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1312,
+        -160
+      ],
+      "id": "1e4d6876-ed9b-4474-93a5-eb69d77f7a65",
+      "name": "Failed Update Response"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"message\": \"failed add new data\"\n}",
+        "options": {
+          "responseCode": 500
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1312,
+        160
+      ],
+      "id": "230954b0-c6ad-4a7b-a863-b2dca2bc413c",
+      "name": "Failed Add Response"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": {{true}},\n  \"ph_max\": {{ $('Update Threshold').item.json.body.ph_max }},\n  \"ph_min\": {{ $('Update Threshold').item.json.body.ph_min }},\n  \"tds_max\": {{ $('Update Threshold').item.json.body.tds_max }},\n  \"tds_min\": {{ $('Update Threshold').item.json.body.tds_min }},\n  \"is_active\": {{ $('Update Threshold').item.json.body.is_active }}\n}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1312,
+        0
+      ],
+      "id": "5bcae742-97cb-4de2-9d74-44899a0fa844",
+      "name": "Success Add Response"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "table": {
+          "__rl": true,
+          "value": "limit_values",
+          "mode": "list",
+          "cachedResultName": "limit_values"
+        },
+        "dataMode": "defineBelow",
+        "columnToMatchOn": "limit_id",
+        "valueToMatchOn": "1",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "is_active",
+              "value": "0"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        272,
+        16
+      ],
+      "id": "6041867c-fa7b-46c9-81ff-de9f09235ae3",
+      "name": "Update Active Treshold",
+      "alwaysOutputData": true,
+      "credentials": {
+        "mySql": {
+          "id": "FUKAK42fw1lGBLPH",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": {{true}},\n  \"ph_max\": {{ $('Update Threshold').item.json.body.ph_max }},\n  \"ph_min\": {{ $('Update Threshold').item.json.body.ph_min }},\n  \"tds_max\": {{ $('Update Threshold').item.json.body.tds_max }},\n  \"tds_min\": {{ $('Update Threshold').item.json.body.tds_min }},\n  \"is_active\": {{ $('Update Threshold').item.json.body.is_active }}\n}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        640,
+        176
+      ],
+      "id": "911244f5-e0a6-4977-a0e3-2836b43726a4",
+      "name": "Success Response"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "table": {
+          "__rl": true,
+          "value": "limit_values",
+          "mode": "list",
+          "cachedResultName": "limit_values"
+        },
+        "dataMode": "defineBelow",
+        "columnToMatchOn": "limit_id",
+        "valueToMatchOn": "={{ $('Check Exists Threshold').item.json.limit_id }}",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "is_active",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        976,
+        -176
+      ],
+      "id": "80ec3e44-a393-4286-bf81-7265817549a8",
+      "name": "Update Exists Data",
+      "executeOnce": false,
+      "alwaysOutputData": true,
+      "credentials": {
+        "mySql": {
+          "id": "FUKAK42fw1lGBLPH",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "PATCH",
+        "path": "threshold/update",
+        "responseMode": "responseNode",
+        "options": {
+          "rawBody": false
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        96,
+        16
+      ],
+      "id": "541be248-b2b3-4f01-8c78-b02689f7f261",
+      "name": "Update Threshold",
+      "webhookId": "c16df68d-3e1f-4aab-b240-b548766cad03"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "09166e73-20a6-4c3f-8ddb-9566b1a9e031",
+              "leftValue": "={{ $('Update Threshold').item.json.body.is_active }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        448,
+        16
+      ],
+      "id": "b4d135f5-2d11-46e1-ad04-f3ac963f4eae",
+      "name": "If Active Threshold"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "table": {
+          "__rl": true,
+          "value": "limit_values",
+          "mode": "list",
+          "cachedResultName": "limit_values"
+        },
+        "limit": 1,
+        "where": {
+          "values": [
+            {
+              "column": "ph_min",
+              "value": "={{ $('Update Threshold').item.json.body.ph_min }}"
+            },
+            {
+              "column": "ph_max",
+              "value": "={{ $('Update Threshold').item.json.body.ph_max }}"
+            },
+            {
+              "column": "tds_min",
+              "value": "={{ $('Update Threshold').item.json.body.tds_min }}"
+            },
+            {
+              "column": "tds_max",
+              "value": "={{ $('Update Threshold').item.json.body.tds_max }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        640,
+        0
+      ],
+      "id": "dedf9348-0c5f-4399-bde3-b29ee045216a",
+      "name": "Check Exists Threshold",
+      "alwaysOutputData": true,
+      "credentials": {
+        "mySql": {
+          "id": "FUKAK42fw1lGBLPH",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "dbb8c734-b4d3-4ac8-94b0-d101b8dc864e",
+              "leftValue": "={{ $json.success }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1136,
+        -176
+      ],
+      "id": "23424f63-1f3e-475c-96d4-d0c9a3ac5828",
+      "name": "If Update Success"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "7fa411fa-3f3c-4e24-9bbb-a89347de498f",
+              "leftValue": "={{ $json.limit_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        800,
+        0
+      ],
+      "id": "88519cb0-bfd1-4273-be6b-75f064605b31",
+      "name": "If Exists"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c3d14e86-387b-43f9-ad79-54cb89dd4deb",
+              "leftValue": "={{ $json.success }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1136,
+        16
+      ],
+      "id": "f2298e7c-eb6f-43fd-9638-1259ea9ef77a",
+      "name": "If Add Success"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Add New Data": {
+      "main": [
+        [
+          {
+            "node": "If Add Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Active Treshold": {
+      "main": [
+        [
+          {
+            "node": "If Active Threshold",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Exists Data": {
+      "main": [
+        [
+          {
+            "node": "If Update Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Threshold": {
+      "main": [
+        [
+          {
+            "node": "Update Active Treshold",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Active Threshold": {
+      "main": [
+        [
+          {
+            "node": "Check Exists Threshold",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Success Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Exists Threshold": {
+      "main": [
+        [
+          {
+            "node": "If Exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Update Success": {
+      "main": [
+        [
+          {
+            "node": "Success Update Response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Failed Update Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Exists": {
+      "main": [
+        [
+          {
+            "node": "Update Exists Data",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Add New Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Add Success": {
+      "main": [
+        [
+          {
+            "node": "Success Add Response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Failed Add Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "7a83574c-bbb9-4584-aef7-7b18bee60d28",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0244782b7ae9b921dd7e4d2535e0e4743669000f812c3d7de7e1235440505061"
+  },
+  "id": "95JRx0InMztVgBfr",
+  "tags": []
+}
