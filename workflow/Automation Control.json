@@ -1,0 +1,671 @@
+{
+  "name": "Automation Control",
+  "nodes": [
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Data Env Trigger').item.json.message.tds }}",
+                    "rightValue": "={{ $('Get Active Treshold').item.json.tds_min }}",
+                    "operator": {
+                      "type": "number",
+                      "operation": "lt"
+                    },
+                    "id": "00ecfd5a-bcd8-4984-8f46-2d5acf6e132e"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "TDS < Ideal"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "ec023d91-8e0f-4821-bd1f-8af3439633d5",
+                    "leftValue": "={{ $('Data Env Trigger').item.json.message.ph }}",
+                    "rightValue": "={{ $('Get Active Treshold').item.json.ph_min }}",
+                    "operator": {
+                      "type": "number",
+                      "operation": "lt"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "pH < Ideal"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "64181fa2-7796-41c1-ab83-d4e46b3684ff",
+                    "leftValue": "={{ $('Data Env Trigger').item.json.message.ph }}",
+                    "rightValue": "={{ $('Get Active Treshold').item.json.ph_max }}",
+                    "operator": {
+                      "type": "number",
+                      "operation": "gt"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "pH > Ideal"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        688,
+        -32
+      ],
+      "id": "fef5d745-18cf-4217-a0b3-840cabd58cbe",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "topics": "environment/data",
+        "options": {
+          "jsonParseBody": true
+        }
+      },
+      "type": "n8n-nodes-base.mqttTrigger",
+      "typeVersion": 1,
+      "position": [
+        96,
+        -16
+      ],
+      "id": "b5290fd7-dc07-4f18-bdc6-ef59d53c8cad",
+      "name": "Data Env Trigger",
+      "credentials": {
+        "mqtt": {
+          "id": "nxPlZZqtgMoMIKs4",
+          "name": "MQTT account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "table": {
+          "__rl": true,
+          "value": "limit_values",
+          "mode": "list",
+          "cachedResultName": "limit_values"
+        },
+        "limit": 1,
+        "where": {
+          "values": [
+            {
+              "column": "is_active",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        288,
+        -16
+      ],
+      "id": "bfa812af-a814-4423-9d47-558151a91cba",
+      "name": "Get Active Treshold",
+      "alwaysOutputData": true,
+      "credentials": {
+        "mySql": {
+          "id": "FUKAK42fw1lGBLPH",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "table": {
+          "__rl": true,
+          "value": "records",
+          "mode": "list",
+          "cachedResultName": "records"
+        },
+        "dataMode": "defineBelow",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "limit_id",
+              "value": "={{ $json.limit_id === undifind ? null : $json.limit_id }}"
+            },
+            {
+              "column": "ph",
+              "value": "={{ $('Data Env Trigger').item.json.message.ph }}"
+            },
+            {
+              "column": "tds",
+              "value": "={{ $('Data Env Trigger').item.json.message.tds }}"
+            },
+            {
+              "column": "created_at",
+              "value": "={{ $('Data Env Trigger').item.json.message.datetime }}"
+            },
+            {
+              "column": "temp",
+              "value": "={{ $('Data Env Trigger').item.json.message.temp }}"
+            }
+          ]
+        },
+        "options": {
+          "detailedOutput": true
+        }
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        480,
+        -16
+      ],
+      "id": "d02c5315-9ae8-401a-8484-52c153f41674",
+      "name": "Add Record Env",
+      "alwaysOutputData": true,
+      "credentials": {
+        "mySql": {
+          "id": "FUKAK42fw1lGBLPH",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const FL = 3; // (ml/s)\nconst VTank = 10; // (ml)\nconst HTank = 20; // (cm)\nconst Rrec = 2; // (ml/L)\n\nconst VCurrent = VTank * ((HTank - $('Data Env Trigger').first().json.message.tank_main) / HTank);\nconst Rv = (VCurrent / 1000) * Rrec;\nconst DurationPh = Rv / FL;\n\n\nreturn [\n  {\n    json: {\n      VCurrent,\n      Rv,\n      DurationPh,\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        976,
+        -16
+      ],
+      "id": "6615bfb9-e2d7-47ba-b23d-e82526a3ef5f",
+      "name": "Calculate Ph Up"
+    },
+    {
+      "parameters": {
+        "jsCode": "const FL = 3; // (ml/s)\nconst VTank = 10; // (ml)\nconst HTank = 20; // (cm)\nconst Rrec = 2; // (ml/L)\n\nconst VCurrent = VTank * ((HTank - $('Data Env Trigger').first().json.message.tank_main) / HTank);\nconst Rv = (VCurrent / 1000) * Rrec;\nconst DurationPh = Rv / FL;\n\n\nreturn [\n  {\n    json: {\n      VCurrent,\n      Rv,\n      DurationPh,\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        976,
+        144
+      ],
+      "id": "b2a46591-8133-44cc-be86-7231f1f5eb21",
+      "name": "Calculate Ph Down"
+    },
+    {
+      "parameters": {
+        "topic": "pump/automation",
+        "sendInputData": false,
+        "message": "={ \"pump\": \"NUTRITION\", \"duration\": {{ $json.DurationN }}}",
+        "options": {
+          "retain": false
+        }
+      },
+      "type": "n8n-nodes-base.mqtt",
+      "typeVersion": 1,
+      "position": [
+        1184,
+        -176
+      ],
+      "id": "5d3debdf-bb7d-47f8-bbf2-ffed7e019bfb",
+      "name": "Send Add Nutrition",
+      "credentials": {
+        "mqtt": {
+          "id": "nxPlZZqtgMoMIKs4",
+          "name": "MQTT account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const FL = 3; // (ml/s)\nconst NT = 400; \nconst VTank = 10; // (ml)\nconst HTank = 20; // (cm)\nconst TT = ($('Get Active Treshold').first().json.tds_min + $('Get Active Treshold').first().json.tds_max) / 2;\n\nconst VCurrent = VTank * ((HTank - $('Data Env Trigger').first().json.message.tank_main) / HTank);\nconst VNutrient = ((TT - $('Data Env Trigger').first().json.message.tds) / (NT - TT)) * VCurrent;\nconst DurationN = VNutrient / FL;\n\n\nreturn [\n  {\n    json: {\n      VCurrent,\n      VNutrient,\n      DurationN,\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        976,
+        -176
+      ],
+      "id": "2a26e828-e94a-4a09-8a26-7ae50a88b086",
+      "name": "Calculate Nutrition"
+    },
+    {
+      "parameters": {
+        "topic": "pump/automation",
+        "sendInputData": false,
+        "message": "={ \"pump\": \"PH_UP\", \"duration\": {{ $json.DurationPh }}}",
+        "options": {
+          "retain": false
+        }
+      },
+      "type": "n8n-nodes-base.mqtt",
+      "typeVersion": 1,
+      "position": [
+        1184,
+        -16
+      ],
+      "id": "00d2afc9-1b0d-4579-b997-3a23af0d6458",
+      "name": "Send Add Ph Up",
+      "credentials": {
+        "mqtt": {
+          "id": "nxPlZZqtgMoMIKs4",
+          "name": "MQTT account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "topic": "pump/automation",
+        "sendInputData": false,
+        "message": "={ \"pump\": \"PH_DOWN\", \"duration\": {{ $json.DurationPh }}}",
+        "options": {
+          "retain": false
+        }
+      },
+      "type": "n8n-nodes-base.mqtt",
+      "typeVersion": 1,
+      "position": [
+        1184,
+        144
+      ],
+      "id": "a3af4da7-ef9a-4085-9fb1-ef31e1ce8b2a",
+      "name": "Send Add Ph Down",
+      "credentials": {
+        "mqtt": {
+          "id": "nxPlZZqtgMoMIKs4",
+          "name": "MQTT account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "table": {
+          "__rl": true,
+          "value": "pump_histories",
+          "mode": "list",
+          "cachedResultName": "pump_histories"
+        },
+        "dataMode": "defineBelow",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "record_id",
+              "value": "={{ $('Add Record Env').item.json.data.insertId }}"
+            },
+            {
+              "column": "pump",
+              "value": "PUMP_PH_DOWN"
+            },
+            {
+              "column": "duration_on",
+              "value": "={{ $json.DurationPh }}"
+            },
+            {
+              "column": "type",
+              "value": "AUTOMATION"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        1392,
+        144
+      ],
+      "id": "ec29aefb-2e2b-46ea-b9e0-d63c08e33016",
+      "name": "Add Record Ph Down",
+      "credentials": {
+        "mySql": {
+          "id": "FUKAK42fw1lGBLPH",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "table": {
+          "__rl": true,
+          "value": "pump_histories",
+          "mode": "list",
+          "cachedResultName": "pump_histories"
+        },
+        "dataMode": "defineBelow",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "record_id",
+              "value": "={{ $('Add Record Env').item.json.data.insertId }}"
+            },
+            {
+              "column": "pump",
+              "value": "PUMP_PH_UP"
+            },
+            {
+              "column": "duration_on",
+              "value": "={{ $json.DurationPh }}"
+            },
+            {
+              "column": "type",
+              "value": "AUTOMATION"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        1392,
+        -16
+      ],
+      "id": "a29989e8-810e-4da3-b317-173a34c9644a",
+      "name": "Add Record Ph Up",
+      "credentials": {
+        "mySql": {
+          "id": "FUKAK42fw1lGBLPH",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "table": {
+          "__rl": true,
+          "value": "pump_histories",
+          "mode": "list",
+          "cachedResultName": "pump_histories"
+        },
+        "dataMode": "defineBelow",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "record_id",
+              "value": "={{ $('Add Record Env').item.json.data.insertId }}"
+            },
+            {
+              "column": "pump",
+              "value": "PUMP_NUTRITION"
+            },
+            {
+              "column": "duration_on",
+              "value": "={{ $json.DurationN }}"
+            },
+            {
+              "column": "type",
+              "value": "AUTOMATION"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        1392,
+        -176
+      ],
+      "id": "d69211c2-0edd-4eaa-b384-3165dcaf5c7f",
+      "name": "Add Record Nutrition",
+      "credentials": {
+        "mySql": {
+          "id": "FUKAK42fw1lGBLPH",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "seconds"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        96,
+        -160
+      ],
+      "id": "cfe1d1e8-ab6b-450f-8a01-46dab8b217c6",
+      "name": "Trigger 30 Min"
+    },
+    {
+      "parameters": {
+        "topic": "environment/refresh",
+        "sendInputData": false,
+        "message": "=1",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mqtt",
+      "typeVersion": 1,
+      "position": [
+        288,
+        -160
+      ],
+      "id": "bd6a0932-adf5-4b0f-ac67-01c687313016",
+      "name": "Send Refresh",
+      "credentials": {
+        "mqtt": {
+          "id": "nxPlZZqtgMoMIKs4",
+          "name": "MQTT account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO `tank_levels` (record_id, tank, level, created_at) VALUES\n({{ $json.data.insertId }}, 'MAIN_TANK', {{ $('Data Env Trigger').item.json.message.tank_main }}, '{{ $('Data Env Trigger').item.json.message.datetime }}'),\n({{ $json.data.insertId }}, 'NUTRITION_A', {{ $('Data Env Trigger').item.json.message.tank_a }}, '{{ $('Data Env Trigger').item.json.message.datetime }}'),\n({{ $json.data.insertId }}, 'NUTRITION_B', {{ $('Data Env Trigger').item.json.message.tank_b }}, '{{ $('Data Env Trigger').item.json.message.datetime }}'),\n({{ $json.data.insertId }}, 'PH_UP', {{ $('Data Env Trigger').item.json.message.tank_ph_up }}, '{{ $('Data Env Trigger').item.json.message.datetime }}'),\n({{ $json.data.insertId }}, 'PH_DOWN', {{ $('Data Env Trigger').item.json.message.tank_ph_down }}, '{{ $('Data Env Trigger').item.json.message.datetime }}');",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        688,
+        -192
+      ],
+      "id": "30764323-8cd4-4bcb-90d4-84e431ceccd0",
+      "name": "Add Tank to Database",
+      "alwaysOutputData": true,
+      "credentials": {
+        "mySql": {
+          "id": "FUKAK42fw1lGBLPH",
+          "name": "MySQL account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Calculate Nutrition",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Calculate Ph Up",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Calculate Ph Down",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data Env Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Active Treshold",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Active Treshold": {
+      "main": [
+        [
+          {
+            "node": "Add Record Env",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Record Env": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Add Tank to Database",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Ph Up": {
+      "main": [
+        [
+          {
+            "node": "Send Add Ph Up",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Ph Down": {
+      "main": [
+        [
+          {
+            "node": "Send Add Ph Down",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Add Nutrition": {
+      "main": [
+        [
+          {
+            "node": "Add Record Nutrition",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Nutrition": {
+      "main": [
+        [
+          {
+            "node": "Send Add Nutrition",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Add Ph Up": {
+      "main": [
+        [
+          {
+            "node": "Add Record Ph Up",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Add Ph Down": {
+      "main": [
+        [
+          {
+            "node": "Add Record Ph Down",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trigger 30 Min": {
+      "main": [
+        [
+          {
+            "node": "Send Refresh",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "c6f16ff9-d0e9-431e-a3b7-b0f999ced6a1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0244782b7ae9b921dd7e4d2535e0e4743669000f812c3d7de7e1235440505061"
+  },
+  "id": "W1kjNnZVmFM2Fdiu",
+  "tags": []
+}

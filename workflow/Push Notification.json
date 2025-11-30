@@ -1,0 +1,449 @@
+{
+  "name": "Push Notification",
+  "nodes": [
+    {
+      "parameters": {
+        "fcmToken": "/topics/notification",
+        "title": "Device Warning",
+        "body": "Perangkat terputus dari broker. Silakan periksa koneksi internet atau daya perangkat.",
+        "additionalFields": {}
+      },
+      "type": "@digital-boss/n8n-nodes-google-firebase-notifications.googleFirebaseNotifications",
+      "typeVersion": 1,
+      "position": [
+        432,
+        0
+      ],
+      "id": "12141c24-549d-40a3-9191-b3095f7d217d",
+      "name": "Send Device Warning Notification",
+      "credentials": {
+        "googleFirebaseNotificationsApi": {
+          "id": "IQdeWqW6pwanK6nL",
+          "name": "Google Firebase Notifications account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "topics": "device/status",
+        "options": {
+          "jsonParseBody": false
+        }
+      },
+      "type": "n8n-nodes-base.mqttTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "f0ca55be-6cb6-415a-9b17-2eecf5e187d0",
+      "name": "Device Status Trigger",
+      "credentials": {
+        "mqtt": {
+          "id": "nxPlZZqtgMoMIKs4",
+          "name": "MQTT account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "topics": "device/status",
+        "options": {
+          "jsonParseBody": false
+        }
+      },
+      "type": "n8n-nodes-base.mqttTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        320
+      ],
+      "id": "32398f6e-02aa-4b46-b865-4fea0ecde4af",
+      "name": "Tank Warning Trigger",
+      "credentials": {
+        "mqtt": {
+          "id": "nxPlZZqtgMoMIKs4",
+          "name": "MQTT account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "2da56190-af05-41d9-aa13-6780069cc577"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Main Tank"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "433f0e14-24dc-4429-b0a1-6eab55cd83fc",
+                    "leftValue": "",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "pH-Up Tank"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "466e5ebc-f3a0-47ce-ae78-1499045066d0",
+                    "leftValue": "",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "pH-Down Tank"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "5e3abb2d-778e-495d-8ac8-5f235ac369e6",
+                    "leftValue": "",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Nutrition A Tank"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "0d73c782-d20e-43b9-8eb9-90cd9629950d",
+                    "leftValue": "",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Nutrition B Tank"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        432,
+        272
+      ],
+      "id": "2d111e2e-be7c-46ad-997a-715fdb4aec0a",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message }}",
+                    "rightValue": "0",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "f6c0f3f8-acbb-4dbd-b58d-ae1c5966a813"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "offline"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "3c322ee7-827f-4bb0-a6db-441354cc386e",
+      "name": "Chek Device Status"
+    },
+    {
+      "parameters": {
+        "fcmToken": "/topics/notification",
+        "title": "Tank Warning",
+        "body": "=Larutan pH-Up tersisa {{ $('Data Env Trigger').item.json.message.tank_ph_up }}. Segera lakukan pengisian ulang.",
+        "additionalFields": {}
+      },
+      "type": "@digital-boss/n8n-nodes-google-firebase-notifications.googleFirebaseNotifications",
+      "typeVersion": 1,
+      "position": [
+        768,
+        160
+      ],
+      "id": "6530c47f-0c2f-4352-a052-c512666ab5fa",
+      "name": "Send Ph Up Warning",
+      "credentials": {
+        "googleFirebaseNotificationsApi": {
+          "id": "IQdeWqW6pwanK6nL",
+          "name": "Google Firebase Notifications account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fcmToken": "/topics/notification",
+        "title": "Tank Warning",
+        "body": "=Larutan pH-Down tersisa {{ $('Data Env Trigger').item.json.message.tank_ph_down }}. Segera lakukan pengisian ulang.",
+        "additionalFields": {}
+      },
+      "type": "@digital-boss/n8n-nodes-google-firebase-notifications.googleFirebaseNotifications",
+      "typeVersion": 1,
+      "position": [
+        768,
+        320
+      ],
+      "id": "8779e8e2-866d-40d8-8dbf-132255e285b5",
+      "name": "Send Ph Down Warning",
+      "credentials": {
+        "googleFirebaseNotificationsApi": {
+          "id": "IQdeWqW6pwanK6nL",
+          "name": "Google Firebase Notifications account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fcmToken": "/topics/notification",
+        "title": "Tank Warning",
+        "body": "=Larutan nutrisi B tersisa {{ $('Data Env Trigger').item.json.message.tank_b }}. Segera lakukan pengisian ulang.",
+        "additionalFields": {}
+      },
+      "type": "@digital-boss/n8n-nodes-google-firebase-notifications.googleFirebaseNotifications",
+      "typeVersion": 1,
+      "position": [
+        768,
+        640
+      ],
+      "id": "c921b90a-40f5-4d34-9da3-3146011e8512",
+      "name": "Send Nutrition B Warning",
+      "credentials": {
+        "googleFirebaseNotificationsApi": {
+          "id": "IQdeWqW6pwanK6nL",
+          "name": "Google Firebase Notifications account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fcmToken": "/topics/notification",
+        "title": "Tank Warning",
+        "body": "=Larutan nutrisi A tersisa {{ $('Data Env Trigger').item.json.message.tank_a }}. Segera lakukan pengisian ulang.",
+        "additionalFields": {}
+      },
+      "type": "@digital-boss/n8n-nodes-google-firebase-notifications.googleFirebaseNotifications",
+      "typeVersion": 1,
+      "position": [
+        768,
+        480
+      ],
+      "id": "71fcd961-57d8-472c-af74-1a455355cb51",
+      "name": "Send Nutrition A Warning",
+      "credentials": {
+        "googleFirebaseNotificationsApi": {
+          "id": "IQdeWqW6pwanK6nL",
+          "name": "Google Firebase Notifications account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fcmToken": "/topics/notification",
+        "title": "Tank Warning",
+        "body": "=Tngki utama tersisa {{ $('Data Env Trigger').item.json.message.tank_main }}. Segera lakukan pengisian ulang.",
+        "additionalFields": {}
+      },
+      "type": "@digital-boss/n8n-nodes-google-firebase-notifications.googleFirebaseNotifications",
+      "typeVersion": 1,
+      "position": [
+        768,
+        0
+      ],
+      "id": "1a793930-723f-4ef6-98f5-d0699132a6db",
+      "name": "Send Main Tank Warning",
+      "credentials": {
+        "googleFirebaseNotificationsApi": {
+          "id": "IQdeWqW6pwanK6nL",
+          "name": "Google Firebase Notifications account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Device Status Trigger": {
+      "main": [
+        [
+          {
+            "node": "Chek Device Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tank Warning Trigger": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chek Device Status": {
+      "main": [
+        [
+          {
+            "node": "Send Device Warning Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Send Main Tank Warning",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Ph Up Warning",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Ph Down Warning",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Nutrition A Warning",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Nutrition B Warning",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e10c8fa3-2dc2-4623-b232-25352481d6f3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0244782b7ae9b921dd7e4d2535e0e4743669000f812c3d7de7e1235440505061"
+  },
+  "id": "Paj2HllQpTQEQrfc",
+  "tags": []
+}

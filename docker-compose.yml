@@ -1,0 +1,66 @@
+services:
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared-tunnel
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run --token TOKEN
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - private-net
+  
+  n8n:
+    image: docker.n8n.io/n8nio/n8n
+    container_name: n8n
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      - GENERIC_TIMEZONE=Asia/Jakarta
+      - TZ=Asia/Jakarta
+      - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
+      - N8N_RUNNERS_ENABLED=true
+      - WEBHOOK_URL=https://n8n.anomali99.my.id/
+    networks:
+      - private-net
+    volumes:
+      - ./n8n/data:/home/node/.n8n
+  
+  mariadb:
+    image: mariadb:10.5
+    container_name: mariadb
+    restart: unless-stopped
+    environment:
+      - MARIADB_ROOT_PASSWORD=
+      - MARIADB_USER=
+      - MARIADB_PASSWORD=
+    volumes:
+      - mariadb:/var/lib/mysql
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - private-net
+    ports:
+      - "3306:3306"
+
+  mqtt-broker:
+    image: eclipse-mosquitto:latest
+    container_name: mqtt-broker
+    restart: unless-stopped
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    networks:
+      - private-net
+    volumes:
+      - ./mosquitto/config:/mosquitto/config
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
+
+
+volumes:
+  mariadb:
+    external: true
+
+networks:
+  private-net:
+    external: true

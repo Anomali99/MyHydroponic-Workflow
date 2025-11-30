@@ -1,5 +1,5 @@
 {
-  "name": "Set Treshold",
+  "name": "Threshold API",
   "nodes": [
     {
       "parameters": {
@@ -416,6 +416,126 @@
       ],
       "id": "f2298e7c-eb6f-43fd-9638-1259ea9ef77a",
       "name": "If Add Success"
+    },
+    {
+      "parameters": {
+        "path": "threshold",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        96,
+        -224
+      ],
+      "id": "2cb4cef7-e941-4e75-959b-75d80400ae6a",
+      "name": "Get Threshold",
+      "webhookId": "5b22d60e-4fb6-4b08-902a-7cae3ab3f9f8"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"is_active\": false,\n  \"ph_min\": 0.0,\n  \"ph_max\": 0.0,\n  \"tds_min\": 0.0,\n  \"tds_max\": 0.0\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        640,
+        -160
+      ],
+      "id": "5e2da4be-96d9-4e27-a256-9487b8bb8b5d",
+      "name": "Respond Blank Threshold"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"is_active\": {{ $json.is_active ? true : false }},\n  \"ph_min\": {{ $json.ph_min }},\n  \"ph_max\": {{ $json.ph_max }},\n  \"tds_min\": {{ $json.tds_min }},\n  \"tds_max\": {{ $json.tds_max }}\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        640,
+        -320
+      ],
+      "id": "c8947878-5b59-4349-84b0-eda5cb4074da",
+      "name": "Respond Exists Threshold"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "table": {
+          "__rl": true,
+          "value": "limit_values",
+          "mode": "list",
+          "cachedResultName": "limit_values"
+        },
+        "limit": 1,
+        "sort": {
+          "values": [
+            {
+              "column": "is_active",
+              "direction": "DESC"
+            },
+            {
+              "column": "limit_id",
+              "direction": "DESC"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        272,
+        -224
+      ],
+      "id": "bbc16fe8-14e0-46bb-ac75-a46bbfd2574f",
+      "name": "Get Exists Threshold",
+      "alwaysOutputData": true,
+      "credentials": {
+        "mySql": {
+          "id": "FUKAK42fw1lGBLPH",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f2cc35a2-246d-41d4-8342-15ccfb92f74b",
+              "leftValue": "={{ $json.limit_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        448,
+        -224
+      ],
+      "id": "8d7cd633-27af-411e-8201-bfcc4320cb23",
+      "name": "If Exists Threshold"
     }
   ],
   "pinData": {},
@@ -546,13 +666,53 @@
           }
         ]
       ]
+    },
+    "Get Threshold": {
+      "main": [
+        [
+          {
+            "node": "Get Exists Threshold",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Exists Threshold": {
+      "main": [
+        [
+          {
+            "node": "If Exists Threshold",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Exists Threshold": {
+      "main": [
+        [
+          {
+            "node": "Respond Exists Threshold",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond Blank Threshold",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "7a83574c-bbb9-4584-aef7-7b18bee60d28",
+  "versionId": "08b4893a-1a66-4c85-a93f-26d8cd74ba11",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "0244782b7ae9b921dd7e4d2535e0e4743669000f812c3d7de7e1235440505061"

@@ -19,6 +19,7 @@ CREATE TABLE `records` (
     `limit_id` INT NULL,
     `ph` FLOAT NOT NULL,
     `tds` FLOAT NOT NULL,
+    `temp` FLOAT NOT NULL,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`record_id`),
     CONSTRAINT `fk_records_limit_id`
@@ -44,6 +45,7 @@ CREATE TABLE `pump_histories` (
     `history_id` INT NOT NULL AUTO_INCREMENT,
     `record_id` INT NULL,
     `pump` ENUM('PUMP_NUTRITION', 'PUMP_PH_UP', 'PUMP_PH_DOWN') NOT NULL,
+    `type` ENUM('AUTOMATION', 'MANUALLY', 'LOCALLY') NOT NULL,
     `duration_on` FLOAT NOT NULL,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`history_id`),
