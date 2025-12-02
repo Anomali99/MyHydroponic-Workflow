@@ -12,7 +12,7 @@
       "typeVersion": 1,
       "position": [
         0,
-        -96
+        -80
       ],
       "id": "ae4e077d-74fd-436b-bb38-3c354f19d983",
       "name": "Manually Trigger",
@@ -160,7 +160,7 @@
       "typeVersion": 1,
       "position": [
         0,
-        96
+        112
       ],
       "id": "be4388b3-e7e1-4360-804d-fd7d4abaec45",
       "name": "Locally Trigger",
@@ -256,102 +256,11 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
       "position": [
-        208,
-        -112
+        240,
+        -16
       ],
       "id": "ae8a5484-d378-42d4-80ca-8196bb3d8dd9",
-      "name": "Manually Switch"
-    },
-    {
-      "parameters": {
-        "rules": {
-          "values": [
-            {
-              "conditions": {
-                "options": {
-                  "caseSensitive": true,
-                  "leftValue": "",
-                  "typeValidation": "strict",
-                  "version": 2
-                },
-                "conditions": [
-                  {
-                    "leftValue": "={{ $json.message.pump }}",
-                    "rightValue": "NUTRITION",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals"
-                    },
-                    "id": "87c745c1-62e8-497e-bb6e-231a2a9d7be0"
-                  }
-                ],
-                "combinator": "and"
-              },
-              "renameOutput": true,
-              "outputKey": "Nutrition"
-            },
-            {
-              "conditions": {
-                "options": {
-                  "caseSensitive": true,
-                  "leftValue": "",
-                  "typeValidation": "strict",
-                  "version": 2
-                },
-                "conditions": [
-                  {
-                    "id": "b257bbbe-05d0-4580-b96a-2a26652f6d53",
-                    "leftValue": "={{ $json.message.pump }}",
-                    "rightValue": "PH_UP",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals",
-                      "name": "filter.operator.equals"
-                    }
-                  }
-                ],
-                "combinator": "and"
-              },
-              "renameOutput": true,
-              "outputKey": "pH-Up"
-            },
-            {
-              "conditions": {
-                "options": {
-                  "caseSensitive": true,
-                  "leftValue": "",
-                  "typeValidation": "strict",
-                  "version": 2
-                },
-                "conditions": [
-                  {
-                    "id": "48d1538f-6577-4699-bf00-33b60de1f62f",
-                    "leftValue": "={{ $json.message.pump }}",
-                    "rightValue": "PH_DOWN",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals",
-                      "name": "filter.operator.equals"
-                    }
-                  }
-                ],
-                "combinator": "and"
-              },
-              "renameOutput": true,
-              "outputKey": "pH-Down"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.switch",
-      "typeVersion": 3.2,
-      "position": [
-        208,
-        80
-      ],
-      "id": "6b59df6b-4912-48ec-911d-f6fe880a0072",
-      "name": "Locally Switch"
+      "name": "Switch"
     }
   ],
   "pinData": {},
@@ -360,7 +269,7 @@
       "main": [
         [
           {
-            "node": "Manually Switch",
+            "node": "Switch",
             "type": "main",
             "index": 0
           }
@@ -371,39 +280,14 @@
       "main": [
         [
           {
-            "node": "Locally Switch",
+            "node": "Switch",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Manually Switch": {
-      "main": [
-        [
-          {
-            "node": "Add Pump Nutrition",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Add Pump pH-Up",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Add Pump pH-Down",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Locally Switch": {
+    "Switch": {
       "main": [
         [
           {
@@ -433,7 +317,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "0dafa9a5-6c39-470d-ae2d-b7ff6ccc2b83",
+  "versionId": "4b591e9e-33a1-46b5-a8ff-5b9f8d5fc8a8",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "0244782b7ae9b921dd7e4d2535e0e4743669000f812c3d7de7e1235440505061"

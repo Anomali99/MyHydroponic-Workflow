@@ -1,0 +1,154 @@
+{
+  "name": "Pending Locally",
+  "nodes": [
+    {
+      "parameters": {
+        "topics": "history/pending",
+        "options": {
+          "jsonParseBody": true
+        }
+      },
+      "type": "n8n-nodes-base.mqttTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "5e49f3bf-260e-4255-86f7-9ebc5200d444",
+      "name": "MQTT Trigger",
+      "credentials": {
+        "mqtt": {
+          "id": "nxPlZZqtgMoMIKs4",
+          "name": "MQTT account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const envList = $input.first().json.message.environment\n\nlet generateText = envList.map(item => `(${item.ph}, ${item.tds}, ${item.temp}, '${item.datetime}')`).join(\", \")\n\nreturn [\n  {\n    json: {\n\"generated_string\": generateText,\n    \"count\": envList.length\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        -64
+      ],
+      "id": "3798b8b8-cdc4-40e5-97f5-49d87373acf4",
+      "name": "Generate Env String"
+    },
+    {
+      "parameters": {
+        "jsCode": "const pumpList = $input.first().json.message.pump\n\nlet generateText = pumpList.map(item => `(${item.duration}, 'PUMP_${item.type}', '${item.datetime}')`).join(\", \")\n\nreturn [\n  {\n    json: {\n\"generated_string\": generateText,\n    \"count\": pumpList.length\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        80
+      ],
+      "id": "8c999901-57e4-44e8-a6a2-5d2632b153a8",
+      "name": "Generate Pump String"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO `records` (ph, tds, temp, created_at) VALUES {{ $json.generated_string }};",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        432,
+        -64
+      ],
+      "id": "9a6b5db4-97d8-42d1-a7d4-2524c5f91460",
+      "name": "Add Env to Database",
+      "alwaysOutputData": true,
+      "credentials": {
+        "mySql": {
+          "id": "FUKAK42fw1lGBLPH",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO `pump_histories` (duration_on, pump, created_at) VALUES {{ $json.generated_string }};",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.5,
+      "position": [
+        432,
+        80
+      ],
+      "id": "e7d319e5-0a8c-4f3c-a19b-49fe928b1593",
+      "name": "Add Pump Histories to Database",
+      "alwaysOutputData": true,
+      "credentials": {
+        "mySql": {
+          "id": "FUKAK42fw1lGBLPH",
+          "name": "MySQL account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "MQTT Trigger": {
+      "main": [
+        [
+          {
+            "node": "Generate Env String",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Generate Pump String",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Env String": {
+      "main": [
+        [
+          {
+            "node": "Add Env to Database",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Pump String": {
+      "main": [
+        [
+          {
+            "node": "Add Pump Histories to Database",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Env to Database": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e29e5a2f-886e-47ac-9e7b-63f1c37c5c06",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0244782b7ae9b921dd7e4d2535e0e4743669000f812c3d7de7e1235440505061"
+  },
+  "id": "aA2vviYkr1BYZaxR",
+  "tags": []
+}

@@ -226,8 +226,8 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        96,
-        16
+        -128,
+        32
       ],
       "id": "541be248-b2b3-4f01-8c78-b02689f7f261",
       "name": "Update Threshold",
@@ -426,8 +426,8 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        96,
-        -224
+        -128,
+        -288
       ],
       "id": "2cb4cef7-e941-4e75-959b-75d80400ae6a",
       "name": "Get Threshold",
@@ -442,8 +442,8 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.4,
       "position": [
-        640,
-        -160
+        624,
+        -240
       ],
       "id": "5e2da4be-96d9-4e27-a256-9487b8bb8b5d",
       "name": "Respond Blank Threshold"
@@ -457,8 +457,8 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.4,
       "position": [
-        640,
-        -320
+        624,
+        -400
       ],
       "id": "c8947878-5b59-4349-84b0-eda5cb4074da",
       "name": "Respond Exists Threshold"
@@ -491,7 +491,7 @@
       "typeVersion": 2.5,
       "position": [
         272,
-        -224
+        -304
       ],
       "id": "bbc16fe8-14e0-46bb-ac75-a46bbfd2574f",
       "name": "Get Exists Threshold",
@@ -532,10 +532,112 @@
       "typeVersion": 2.2,
       "position": [
         448,
-        -224
+        -304
       ],
       "id": "8d7cd633-27af-411e-8201-bfcc4320cb23",
       "name": "If Exists Threshold"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "69b0ffac-372f-4614-8acb-0e14b9089fcd",
+              "leftValue": "={{ $json.headers.authorization.split(' ')[1] }}",
+              "rightValue": "512706",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        64,
+        -288
+      ],
+      "id": "86fae322-9446-4f7b-9a98-671c12a42c39",
+      "name": "If Authorized Get"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"message\": \"unauthorized access\"\n}",
+        "options": {
+          "responseCode": 401
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        272,
+        -144
+      ],
+      "id": "b2471081-b5d9-4872-aba0-6a41e71925b5",
+      "name": "Respond Unauthorized Get"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"message\": \"unauthorized access\"\n}",
+        "options": {
+          "responseCode": 401
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        272,
+        176
+      ],
+      "id": "f01ac94a-cf44-4eab-a8b6-2d73405437b9",
+      "name": "Respond Unauthorized Update"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "69b0ffac-372f-4614-8acb-0e14b9089fcd",
+              "leftValue": "={{ $json.headers.authorization.split(' ')[1] }}",
+              "rightValue": "512706",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        64,
+        32
+      ],
+      "id": "eeb73a38-1d61-458f-a4a8-5cc6c365c7c1",
+      "name": "If Authorized Update"
     }
   ],
   "pinData": {},
@@ -577,7 +679,7 @@
       "main": [
         [
           {
-            "node": "Update Active Treshold",
+            "node": "If Authorized Update",
             "type": "main",
             "index": 0
           }
@@ -671,7 +773,7 @@
       "main": [
         [
           {
-            "node": "Get Exists Threshold",
+            "node": "If Authorized Get",
             "type": "main",
             "index": 0
           }
@@ -706,13 +808,49 @@
           }
         ]
       ]
+    },
+    "If Authorized Get": {
+      "main": [
+        [
+          {
+            "node": "Get Exists Threshold",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond Unauthorized Get",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Authorized Update": {
+      "main": [
+        [
+          {
+            "node": "Update Active Treshold",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond Unauthorized Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "08b4893a-1a66-4c85-a93f-26d8cd74ba11",
+  "versionId": "db8b38f5-e51a-4f16-ba8c-e41da1ca46e2",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "0244782b7ae9b921dd7e4d2535e0e4743669000f812c3d7de7e1235440505061"
