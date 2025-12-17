@@ -100,7 +100,7 @@
       "type": "n8n-nodes-base.mqttTrigger",
       "typeVersion": 1,
       "position": [
-        96,
+        -96,
         -16
       ],
       "id": "b5290fd7-dc07-4f18-bdc6-ef59d53c8cad",
@@ -203,7 +203,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const FL = 3; // (ml/s)\nconst VTank = 10; // (ml)\nconst HTank = 20; // (cm)\nconst Rrec = 2; // (ml/L)\n\nconst VCurrent = VTank * ((HTank - $('Data Env Trigger').first().json.message.tank_main) / HTank);\nconst Rv = (VCurrent / 1000) * Rrec;\nconst DurationPh = Rv / FL;\n\n\nreturn [\n  {\n    json: {\n      VCurrent,\n      Rv,\n      DurationPh,\n    }\n  }\n];"
+        "jsCode": "const FL = 40.0; // (ml/s)\nconst Rrec = 1.0; // (ml/L)\n\nconst VCurrent = $('Data Env Trigger').first().json.message.tank_main;\n\nconst Rv = (VCurrent / 1000) * Rrec;\nconst DurationPh = Rv / FL;\n\n\nreturn [\n  {\n    json: {\n      Rv,\n      DurationPh,\n    }\n  }\n];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -216,7 +216,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const FL = 3; // (ml/s)\nconst VTank = 10; // (ml)\nconst HTank = 20; // (cm)\nconst Rrec = 2; // (ml/L)\n\nconst VCurrent = VTank * ((HTank - $('Data Env Trigger').first().json.message.tank_main) / HTank);\nconst Rv = (VCurrent / 1000) * Rrec;\nconst DurationPh = Rv / FL;\n\n\nreturn [\n  {\n    json: {\n      VCurrent,\n      Rv,\n      DurationPh,\n    }\n  }\n];"
+        "jsCode": "const FL = 40.0; // (ml/s)\nconst Rrec = 1.0; // (ml/L)\n\nconst VCurrent = $('Data Env Trigger').first().json.message.tank_main;\n\nconst Rv = (VCurrent / 1000) * Rrec;\nconst DurationPh = Rv / FL;\n\n\nreturn [\n  {\n    json: {\n      Rv,\n      DurationPh,\n    }\n  }\n];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -250,19 +250,6 @@
           "name": "MQTT account"
         }
       }
-    },
-    {
-      "parameters": {
-        "jsCode": "const FL = 3; // (ml/s)\nconst NT = 400; \nconst VTank = 10; // (ml)\nconst HTank = 20; // (cm)\nconst TT = ($('Get Active Treshold').first().json.tds_min + $('Get Active Treshold').first().json.tds_max) / 2;\n\nconst VCurrent = VTank * ((HTank - $('Data Env Trigger').first().json.message.tank_main) / HTank);\nconst VNutrient = ((TT - $('Data Env Trigger').first().json.message.tds) / (NT - TT)) * VCurrent;\nconst DurationN = VNutrient / FL;\n\n\nreturn [\n  {\n    json: {\n      VCurrent,\n      VNutrient,\n      DurationN,\n    }\n  }\n];"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        976,
-        -176
-      ],
-      "id": "2a26e828-e94a-4a09-8a26-7ae50a88b086",
-      "name": "Calculate Nutrition"
     },
     {
       "parameters": {
@@ -463,7 +450,7 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [
-        96,
+        -96,
         -160
       ],
       "id": "cfe1d1e8-ab6b-450f-8a01-46dab8b217c6",
@@ -479,7 +466,7 @@
       "type": "n8n-nodes-base.mqtt",
       "typeVersion": 1,
       "position": [
-        288,
+        96,
         -160
       ],
       "id": "bd6a0932-adf5-4b0f-ac67-01c687313016",
@@ -512,6 +499,32 @@
           "name": "MySQL account"
         }
       }
+    },
+    {
+      "parameters": {
+        "jsCode": "const FL = 40.0; // (ml/s)\nconst NT = 50000; // (ppm)\n\nconst VCurrent = $('Data Env Trigger').first().json.message.tank_main;\nconst CT = $('Data Env Trigger').first().json.message.tds;\nconst TT = ($('Get Active Treshold').first().json.tds_min + $('Get Active Treshold').first().json.tds_max) / 2;\n\nconst VNutrient = ((TT - CT) / (NT - TT)) * VCurrent;\nconst DurationN = VNutrient / FL;\n\nreturn [\n  {\n    json: {\n      VNutrient,\n      DurationN,\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        976,
+        -176
+      ],
+      "id": "2a26e828-e94a-4a09-8a26-7ae50a88b086",
+      "name": "Calculate Nutrition"
+    },
+    {
+      "parameters": {
+        "jsCode": "const staticData = $getWorkflowStaticData('global');\nconst currentPayload = items[0].json.message; \n\nif (staticData.lastProcessedMessage === currentPayload) {\n  return [];\n}\n\nstaticData.lastProcessedMessage = currentPayload;\n\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        96,
+        -16
+      ],
+      "id": "7608962a-2970-47c4-8078-1a40bdd1a1f4",
+      "name": "Retained Filter"
     }
   ],
   "pinData": {},
@@ -545,7 +558,7 @@
       "main": [
         [
           {
-            "node": "Get Active Treshold",
+            "node": "Retained Filter",
             "type": "main",
             "index": 0
           }
@@ -612,17 +625,6 @@
         ]
       ]
     },
-    "Calculate Nutrition": {
-      "main": [
-        [
-          {
-            "node": "Send Add Nutrition",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Send Add Ph Up": {
       "main": [
         [
@@ -655,13 +657,35 @@
           }
         ]
       ]
+    },
+    "Calculate Nutrition": {
+      "main": [
+        [
+          {
+            "node": "Send Add Nutrition",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Retained Filter": {
+      "main": [
+        [
+          {
+            "node": "Get Active Treshold",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "c6f16ff9-d0e9-431e-a3b7-b0f999ced6a1",
+  "versionId": "8510c316-5204-489c-8757-5bd4b5cfd325",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "0244782b7ae9b921dd7e4d2535e0e4743669000f812c3d7de7e1235440505061"

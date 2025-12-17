@@ -33,7 +33,7 @@
       "type": "n8n-nodes-base.mqttTrigger",
       "typeVersion": 1,
       "position": [
-        0,
+        -192,
         0
       ],
       "id": "f0ca55be-6cb6-415a-9b17-2eecf5e187d0",
@@ -47,7 +47,7 @@
     },
     {
       "parameters": {
-        "topics": "device/status",
+        "topics": "tank/notification",
         "options": {
           "jsonParseBody": false
         }
@@ -55,7 +55,7 @@
       "type": "n8n-nodes-base.mqttTrigger",
       "typeVersion": 1,
       "position": [
-        0,
+        -192,
         320
       ],
       "id": "32398f6e-02aa-4b46-b865-4fea0ecde4af",
@@ -243,7 +243,7 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
       "position": [
-        208,
+        224,
         0
       ],
       "id": "3c322ee7-827f-4bb0-a6db-441354cc386e",
@@ -358,6 +358,19 @@
           "name": "Google Firebase Notifications account"
         }
       }
+    },
+    {
+      "parameters": {
+        "jsCode": "const staticData = $getWorkflowStaticData('global');\nconst currentPayload = items[0].json.message; \n\nif (staticData.lastProcessedMessage === currentPayload) {\n  return [];\n}\n\nstaticData.lastProcessedMessage = currentPayload;\n\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        16,
+        0
+      ],
+      "id": "f721d11c-f52f-4b3e-b751-80e327f5b195",
+      "name": "Retained Filter"
     }
   ],
   "pinData": {},
@@ -366,7 +379,7 @@
       "main": [
         [
           {
-            "node": "Chek Device Status",
+            "node": "Retained Filter",
             "type": "main",
             "index": 0
           }
@@ -433,13 +446,24 @@
           }
         ]
       ]
+    },
+    "Retained Filter": {
+      "main": [
+        [
+          {
+            "node": "Chek Device Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "e10c8fa3-2dc2-4623-b232-25352481d6f3",
+  "versionId": "99d564de-26dc-46b5-b68f-6c4165639242",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "0244782b7ae9b921dd7e4d2535e0e4743669000f812c3d7de7e1235440505061"

@@ -122,24 +122,8 @@
     },
     {
       "parameters": {
-        "operation": "update",
-        "table": {
-          "__rl": true,
-          "value": "limit_values",
-          "mode": "list",
-          "cachedResultName": "limit_values"
-        },
-        "dataMode": "defineBelow",
-        "columnToMatchOn": "limit_id",
-        "valueToMatchOn": "1",
-        "valuesToSend": {
-          "values": [
-            {
-              "column": "is_active",
-              "value": "0"
-            }
-          ]
-        },
+        "operation": "executeQuery",
+        "query": "UPDATE limit_values SET is_active = false WHERE is_active = true;",
         "options": {}
       },
       "type": "n8n-nodes-base.mySql",
@@ -550,7 +534,7 @@
             {
               "id": "69b0ffac-372f-4614-8acb-0e14b9089fcd",
               "leftValue": "={{ $json.headers.authorization.split(' ')[1] }}",
-              "rightValue": "512706",
+              "rightValue": "7125",
               "operator": {
                 "type": "string",
                 "operation": "equals",
@@ -618,7 +602,7 @@
             {
               "id": "69b0ffac-372f-4614-8acb-0e14b9089fcd",
               "leftValue": "={{ $json.headers.authorization.split(' ')[1] }}",
-              "rightValue": "512706",
+              "rightValue": "7125",
               "operator": {
                 "type": "string",
                 "operation": "equals",
@@ -850,7 +834,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "db8b38f5-e51a-4f16-ba8c-e41da1ca46e2",
+  "versionId": "2f228c55-84dd-405a-9cde-e494ce280aee",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "0244782b7ae9b921dd7e4d2535e0e4743669000f812c3d7de7e1235440505061"
