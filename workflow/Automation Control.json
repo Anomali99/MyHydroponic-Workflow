@@ -442,7 +442,8 @@
         "rule": {
           "interval": [
             {
-              "field": "seconds"
+              "field": "minutes",
+              "minutesInterval": 30
             }
           ]
         }
@@ -515,7 +516,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const staticData = $getWorkflowStaticData('global');\nconst currentPayload = items[0].json.message; \n\nif (staticData.lastProcessedMessage === currentPayload) {\n  return [];\n}\n\nstaticData.lastProcessedMessage = currentPayload;\n\nreturn items;"
+        "jsCode": "const staticData = $getWorkflowStaticData('global');\nconst currentPayload = $input.first().json.message.datetime; \n\nif (staticData.lastProcessedMessage === currentPayload) {\n  return [];\n}\n\nstaticData.lastProcessedMessage = currentPayload;\n\nreturn $input.first();"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -681,11 +682,11 @@
       ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "8510c316-5204-489c-8757-5bd4b5cfd325",
+  "versionId": "9b117df9-2554-4894-9b79-70731ffd975f",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "0244782b7ae9b921dd7e4d2535e0e4743669000f812c3d7de7e1235440505061"

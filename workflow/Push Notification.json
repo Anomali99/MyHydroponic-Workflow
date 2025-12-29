@@ -47,169 +47,6 @@
     },
     {
       "parameters": {
-        "topics": "tank/notification",
-        "options": {
-          "jsonParseBody": false
-        }
-      },
-      "type": "n8n-nodes-base.mqttTrigger",
-      "typeVersion": 1,
-      "position": [
-        -192,
-        320
-      ],
-      "id": "32398f6e-02aa-4b46-b865-4fea0ecde4af",
-      "name": "Tank Warning Trigger",
-      "credentials": {
-        "mqtt": {
-          "id": "nxPlZZqtgMoMIKs4",
-          "name": "MQTT account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "rules": {
-          "values": [
-            {
-              "conditions": {
-                "options": {
-                  "caseSensitive": true,
-                  "leftValue": "",
-                  "typeValidation": "strict",
-                  "version": 2
-                },
-                "conditions": [
-                  {
-                    "leftValue": "",
-                    "rightValue": "",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals"
-                    },
-                    "id": "2da56190-af05-41d9-aa13-6780069cc577"
-                  }
-                ],
-                "combinator": "and"
-              },
-              "renameOutput": true,
-              "outputKey": "Main Tank"
-            },
-            {
-              "conditions": {
-                "options": {
-                  "caseSensitive": true,
-                  "leftValue": "",
-                  "typeValidation": "strict",
-                  "version": 2
-                },
-                "conditions": [
-                  {
-                    "id": "433f0e14-24dc-4429-b0a1-6eab55cd83fc",
-                    "leftValue": "",
-                    "rightValue": "",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals",
-                      "name": "filter.operator.equals"
-                    }
-                  }
-                ],
-                "combinator": "and"
-              },
-              "renameOutput": true,
-              "outputKey": "pH-Up Tank"
-            },
-            {
-              "conditions": {
-                "options": {
-                  "caseSensitive": true,
-                  "leftValue": "",
-                  "typeValidation": "strict",
-                  "version": 2
-                },
-                "conditions": [
-                  {
-                    "id": "466e5ebc-f3a0-47ce-ae78-1499045066d0",
-                    "leftValue": "",
-                    "rightValue": "",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals",
-                      "name": "filter.operator.equals"
-                    }
-                  }
-                ],
-                "combinator": "and"
-              },
-              "renameOutput": true,
-              "outputKey": "pH-Down Tank"
-            },
-            {
-              "conditions": {
-                "options": {
-                  "caseSensitive": true,
-                  "leftValue": "",
-                  "typeValidation": "strict",
-                  "version": 2
-                },
-                "conditions": [
-                  {
-                    "id": "5e3abb2d-778e-495d-8ac8-5f235ac369e6",
-                    "leftValue": "",
-                    "rightValue": "",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals",
-                      "name": "filter.operator.equals"
-                    }
-                  }
-                ],
-                "combinator": "and"
-              },
-              "renameOutput": true,
-              "outputKey": "Nutrition A Tank"
-            },
-            {
-              "conditions": {
-                "options": {
-                  "caseSensitive": true,
-                  "leftValue": "",
-                  "typeValidation": "strict",
-                  "version": 2
-                },
-                "conditions": [
-                  {
-                    "id": "0d73c782-d20e-43b9-8eb9-90cd9629950d",
-                    "leftValue": "",
-                    "rightValue": "",
-                    "operator": {
-                      "type": "string",
-                      "operation": "equals",
-                      "name": "filter.operator.equals"
-                    }
-                  }
-                ],
-                "combinator": "and"
-              },
-              "renameOutput": true,
-              "outputKey": "Nutrition B Tank"
-            }
-          ]
-        },
-        "options": {}
-      },
-      "type": "n8n-nodes-base.switch",
-      "typeVersion": 3.2,
-      "position": [
-        432,
-        272
-      ],
-      "id": "2d111e2e-be7c-46ad-997a-715fdb4aec0a",
-      "name": "Switch"
-    },
-    {
-      "parameters": {
         "rules": {
           "values": [
             {
@@ -251,9 +88,185 @@
     },
     {
       "parameters": {
+        "jsCode": "const staticData = $getWorkflowStaticData('global');\nconst currentPayload = items[0].json.message; \n\nif (staticData.lastProcessedMessage === currentPayload) {\n  return [];\n}\n\nstaticData.lastProcessedMessage = currentPayload;\n\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        16,
+        0
+      ],
+      "id": "f721d11c-f52f-4b3e-b751-80e327f5b195",
+      "name": "Retained Filter"
+    },
+    {
+      "parameters": {
+        "topics": "tank/notification",
+        "options": {
+          "jsonParseBody": true
+        }
+      },
+      "type": "n8n-nodes-base.mqttTrigger",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        320
+      ],
+      "id": "192366e9-4e59-4b9e-b4b3-b7119bcdcce9",
+      "name": "Tank Warning Trigger",
+      "credentials": {
+        "mqtt": {
+          "id": "nxPlZZqtgMoMIKs4",
+          "name": "MQTT account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message.type }}",
+                    "rightValue": "MAIN_TANK",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "2da56190-af05-41d9-aa13-6780069cc577"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Main Tank"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "433f0e14-24dc-4429-b0a1-6eab55cd83fc",
+                    "leftValue": "={{ $json.message.type }}",
+                    "rightValue": "PH_UP",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "pH-Up Tank"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "466e5ebc-f3a0-47ce-ae78-1499045066d0",
+                    "leftValue": "={{ $json.message.type }}",
+                    "rightValue": "PH_DOWN",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "pH-Down Tank"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "5e3abb2d-778e-495d-8ac8-5f235ac369e6",
+                    "leftValue": "={{ $json.message.type }}",
+                    "rightValue": "NUTRITION_A",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Nutrition A Tank"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "0d73c782-d20e-43b9-8eb9-90cd9629950d",
+                    "leftValue": "={{ $json.message.type }}",
+                    "rightValue": "NUTRITION_B",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Nutrition B Tank"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        432,
+        272
+      ],
+      "id": "bfdc293f-2bdc-45a7-97bc-29cfeaae9e0f",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
         "fcmToken": "/topics/notification",
         "title": "Tank Warning",
-        "body": "=Larutan pH-Up tersisa {{ $('Data Env Trigger').item.json.message.tank_ph_up }}. Segera lakukan pengisian ulang.",
+        "body": "=Larutan pH-Up tersisa {{ parseFloat($json.message.volume.toFixed(2)).toString().replace('.', ',') }} ml. Segera lakukan pengisian ulang.",
         "additionalFields": {}
       },
       "type": "@digital-boss/n8n-nodes-google-firebase-notifications.googleFirebaseNotifications",
@@ -262,7 +275,7 @@
         768,
         160
       ],
-      "id": "6530c47f-0c2f-4352-a052-c512666ab5fa",
+      "id": "2a9d14e3-3936-4a72-873e-62343191f506",
       "name": "Send Ph Up Warning",
       "credentials": {
         "googleFirebaseNotificationsApi": {
@@ -275,7 +288,7 @@
       "parameters": {
         "fcmToken": "/topics/notification",
         "title": "Tank Warning",
-        "body": "=Larutan pH-Down tersisa {{ $('Data Env Trigger').item.json.message.tank_ph_down }}. Segera lakukan pengisian ulang.",
+        "body": "=Larutan pH-Down tersisa {{ parseFloat($json.message.volume.toFixed(2)).toString().replace('.', ',') }} ml. Segera lakukan pengisian ulang.",
         "additionalFields": {}
       },
       "type": "@digital-boss/n8n-nodes-google-firebase-notifications.googleFirebaseNotifications",
@@ -284,7 +297,7 @@
         768,
         320
       ],
-      "id": "8779e8e2-866d-40d8-8dbf-132255e285b5",
+      "id": "101320f2-a970-4e88-82de-d51b13a77483",
       "name": "Send Ph Down Warning",
       "credentials": {
         "googleFirebaseNotificationsApi": {
@@ -297,7 +310,7 @@
       "parameters": {
         "fcmToken": "/topics/notification",
         "title": "Tank Warning",
-        "body": "=Larutan nutrisi B tersisa {{ $('Data Env Trigger').item.json.message.tank_b }}. Segera lakukan pengisian ulang.",
+        "body": "=Larutan nutrisi B tersisa {{ parseFloat($json.message.volume.toFixed(2)).toString().replace('.', ',') }} ml. Segera lakukan pengisian ulang.",
         "additionalFields": {}
       },
       "type": "@digital-boss/n8n-nodes-google-firebase-notifications.googleFirebaseNotifications",
@@ -306,7 +319,7 @@
         768,
         640
       ],
-      "id": "c921b90a-40f5-4d34-9da3-3146011e8512",
+      "id": "b2d120ec-5212-4eee-b390-a6d831763cfa",
       "name": "Send Nutrition B Warning",
       "credentials": {
         "googleFirebaseNotificationsApi": {
@@ -319,7 +332,7 @@
       "parameters": {
         "fcmToken": "/topics/notification",
         "title": "Tank Warning",
-        "body": "=Larutan nutrisi A tersisa {{ $('Data Env Trigger').item.json.message.tank_a }}. Segera lakukan pengisian ulang.",
+        "body": "=Larutan nutrisi A tersisa {{ parseFloat($json.message.volume.toFixed(2)).toString().replace('.', ',') }} ml. Segera lakukan pengisian ulang.",
         "additionalFields": {}
       },
       "type": "@digital-boss/n8n-nodes-google-firebase-notifications.googleFirebaseNotifications",
@@ -328,7 +341,7 @@
         768,
         480
       ],
-      "id": "71fcd961-57d8-472c-af74-1a455355cb51",
+      "id": "aeaa2e2d-19b3-4b48-8dd6-58b23bce58da",
       "name": "Send Nutrition A Warning",
       "credentials": {
         "googleFirebaseNotificationsApi": {
@@ -341,7 +354,7 @@
       "parameters": {
         "fcmToken": "/topics/notification",
         "title": "Tank Warning",
-        "body": "=Tngki utama tersisa {{ $('Data Env Trigger').item.json.message.tank_main }}. Segera lakukan pengisian ulang.",
+        "body": "=Tngki utama tersisa {{ parseFloat($json.message.volume.toFixed(2)).toString().replace('.', ',') }} ml. Segera lakukan pengisian ulang.",
         "additionalFields": {}
       },
       "type": "@digital-boss/n8n-nodes-google-firebase-notifications.googleFirebaseNotifications",
@@ -350,7 +363,7 @@
         768,
         0
       ],
-      "id": "1a793930-723f-4ef6-98f5-d0699132a6db",
+      "id": "9ff2c82c-fd9c-484d-9711-a678a8d1f359",
       "name": "Send Main Tank Warning",
       "credentials": {
         "googleFirebaseNotificationsApi": {
@@ -358,19 +371,6 @@
           "name": "Google Firebase Notifications account"
         }
       }
-    },
-    {
-      "parameters": {
-        "jsCode": "const staticData = $getWorkflowStaticData('global');\nconst currentPayload = items[0].json.message; \n\nif (staticData.lastProcessedMessage === currentPayload) {\n  return [];\n}\n\nstaticData.lastProcessedMessage = currentPayload;\n\nreturn items;"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        16,
-        0
-      ],
-      "id": "f721d11c-f52f-4b3e-b751-80e327f5b195",
-      "name": "Retained Filter"
     }
   ],
   "pinData": {},
@@ -386,22 +386,33 @@
         ]
       ]
     },
-    "Tank Warning Trigger": {
+    "Chek Device Status": {
       "main": [
         [
           {
-            "node": "Switch",
+            "node": "Send Device Warning Notification",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Chek Device Status": {
+    "Retained Filter": {
       "main": [
         [
           {
-            "node": "Send Device Warning Notification",
+            "node": "Chek Device Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tank Warning Trigger": {
+      "main": [
+        [
+          {
+            "node": "Switch",
             "type": "main",
             "index": 0
           }
@@ -446,24 +457,13 @@
           }
         ]
       ]
-    },
-    "Retained Filter": {
-      "main": [
-        [
-          {
-            "node": "Chek Device Status",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "99d564de-26dc-46b5-b68f-6c4165639242",
+  "versionId": "adfa3706-fae9-453c-b244-6e1fbd906c01",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "0244782b7ae9b921dd7e4d2535e0e4743669000f812c3d7de7e1235440505061"
