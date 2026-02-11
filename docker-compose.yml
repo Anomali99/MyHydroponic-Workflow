@@ -8,9 +8,9 @@ services:
       - "host.docker.internal:host-gateway"
     networks:
       - private-net
-  
+
   n8n:
-    image: docker.n8n.io/n8nio/n8n
+    image: docker.n8n.io/n8nio/n8n:1.110.1
     container_name: n8n
     restart: unless-stopped
     ports:
@@ -25,7 +25,7 @@ services:
       - private-net
     volumes:
       - ./n8n/data:/home/node/.n8n
-  
+
   mariadb:
     image: mariadb:10.5
     container_name: mariadb
@@ -55,7 +55,6 @@ services:
       - ./mosquitto/config:/mosquitto/config
       - ./mosquitto/data:/mosquitto/data
       - ./mosquitto/log:/mosquitto/log
-
 
 volumes:
   mariadb:
