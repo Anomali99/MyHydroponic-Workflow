@@ -33,7 +33,7 @@ Jika Docker belum terinstal pada server, jalankan perintah berikut:
 
 ```bash
 # Menginstal Docker
-curl -fsSL [https://get.docker.com](https://get.docker.com) -o get-docker.sh
+curl -fsSL https://get.docker.com -o get-docker.sh
 sh get-docker.sh
 
 # Menginstal Docker Compose
